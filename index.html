@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thảo's Chinese Hub 🌸</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FDFBF7',
+            rosegold: '#E8A598',
+            sage: '#A3B18A',
+            ink: '#4A3F3F'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            chinese: ['Noto Serif SC', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Import Map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --cream: #FDFBF7;
+      --rosegold: #E8A598;
+      --sage: #A3B18A;
+      --ink: #4A3F3F;
+    }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .font-chinese {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .soft-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(232, 165, 152, 0.25);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-primary {
+      background: var(--rosegold);
+      color: white;
+      border-radius: 9999px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: #d49487;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(232, 165, 152, 0.35);
+    }
+
+    .btn-sage {
+      background: var(--sage);
+      color: white;
+      border-radius: 9999px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-sage:hover {
+      background: #8f9d78;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(163, 177, 138, 0.4);
+    }
+
+    .tab-active {
+      background: var(--rosegold);
+      color: white;
+      border-radius: 9999px;
+    }
+    .tab-inactive {
+      color: #8b7b7b;
+    }
+    .tab-inactive:hover {
+      background: rgba(232, 165, 152, 0.15);
+      border-radius: 9999px;
+    }
+
+    .flip-card {
+      perspective: 1000px;
+      width: 140px;
+      height: 180px;
+      cursor: pointer;
+      margin: 0 auto;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+    .flip-card-front {
+      background: white;
+      border: 1px solid rgba(232, 165, 152, 0.3);
+    }
+    .flip-card-back {
+      background: #FFF7F5;
+      border: 1px solid rgba(163, 177, 138, 0.3);
+      transform: rotateY(180deg);
+      padding: 0.75rem;
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .pulse-soft { animation: pulse-soft 2s infinite; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Quiz modal custom styles */
+    .quiz-modal-card {
+      background: linear-gradient(145deg, #ffffff 0%, #fff5f3 100%);
+      border: 1px solid rgba(232, 165, 152, 0.4);
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      padding: 2rem;
+    }
+    .quiz-option-btn {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: 2px solid rgba(232, 165, 152, 0.25);
+      background: white;
+      border-radius: 1.25rem;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    .quiz-option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(232, 165, 152, 0.1), transparent);
+      transition: left 0.5s;
+    }
+    .quiz-option-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -8px rgba(232, 165, 152, 0.4);
+      border-color: #E8A598;
+      background: #FFF9F7;
+    }
+    .quiz-option-btn:hover::before {
+      left: 100%;
+    }
+    .quiz-option-btn.correct {
+      background: #f0f7eb;
+      border-color: #A3B18A !important;
+      color: #4A7C59;
+      font-weight: 600;
+      animation: correctPulse 0.6s ease;
+    }
+    .quiz-option-btn.incorrect {
+      background: #fde8e3;
+      border-color: #E8A598 !important;
+      color: #B5533C;
+      font-weight: 600;
+      animation: shake 0.4s ease;
+    }
+    .quiz-progress-bar {
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(90deg, #E8A598, #A3B18A);
+      border-radius: 9999px;
+      height: 100%;
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+    }
+    .encouragement-text {
+      font-weight: 600;
+      animation: fadeInUp 0.4s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes correctPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-cream">
+
+  <!-- 🔒 LOCK OVERLAY -->
+  <div id="lock-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-[#FDFBF7]/95 backdrop-blur-md">
+    <div class="text-center p-8 max-w-md">
+      <div class="text-6xl mb-4">🌸</div>
+      <h2 class="text-2xl font-bold text-rosegold mb-2">Không gian riêng tư</h2>
+      <p class="text-lg text-ink/70">Rất tiếc, không gian này dành riêng cho Thảo! 🌸</p>
+    </div>
+  </div>
+
+  <!-- 🔐 LOGIN MODAL -->
+  <div id="login-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-[#FDFBF7]/80 backdrop-blur-sm p-4">
+    <div class="soft-card p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-2">🌸</div>
+        <h2 class="text-2xl font-bold text-ink">Thảo's Chinese Hub</h2>
+        <p class="text-sm text-ink/60 mt-1">Đăng nhập để tiếp tục học tiếng Trung</p>
+      </div>
+
+      <button id="google-login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-rosegold/30 text-ink font-semibold py-3 rounded-full hover:bg-rosegold/5 transition mb-4">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+        Đăng nhập bằng Google
+      </button>
+
+      <div class="flex items-center gap-3 my-4">
+        <div class="flex-1 h-px bg-rosegold/30"></div>
+        <span class="text-xs text-ink/50">hoặc email</span>
+        <div class="flex-1 h-px bg-rosegold/30"></div>
+      </div>
+
+      <div class="space-y-3">
+        <input id="login-email" type="email" placeholder="Email" class="w-full px-4 py-2.5 rounded-full border border-rosegold/30 bg-white focus:outline-none focus:ring-2 focus:ring-rosegold/40" />
+        <input id="login-password" type="password" placeholder="Mật khẩu" class="w-full px-4 py-2.5 rounded-full border border-rosegold/30 bg-white focus:outline-none focus:ring-2 focus:ring-rosegold/40" />
+        <button id="login-btn" class="w-full btn-primary py-2.5">Đăng nhập</button>
+        <button id="register-btn" class="w-full text-sm text-rosegold hover:underline">Chưa có tài khoản? Đăng ký</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌸 MAIN APP -->
+  <div id="main-app" class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- HEADER -->
+    <header class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-rosegold/20 flex items-center justify-center text-2xl">🌸</div>
+        <div>
+          <h1 class="text-xl font-bold text-ink">Thảo's Chinese Hub</h1>
+          <p class="text-xs text-ink/50">Học tiếng Trung mỗi ngày cùng AI</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="header-user-email" class="text-sm text-ink/60 hidden md:block"></span>
+        <button id="logout-btn" class="text-sm bg-white border border-rosegold/30 px-4 py-1.5 rounded-full hover:bg-rosegold/5 transition">Đăng xuất</button>
+      </div>
+    </header>
+
+    <!-- NAV TABS -->
+    <nav class="flex flex-wrap gap-2 mb-8" id="main-tabs">
+      <button data-tab="dashboard" class="tab-btn px-4 py-2 text-sm font-semibold tab-active"><span data-lucide="layout-dashboard" class="inline w-4 h-4 mr-1"></span> Bảng điều khiển</button>
+      <button data-tab="pinyin" class="tab-btn px-4 py-2 text-sm font-semibold tab-inactive"><span data-lucide="volume-2" class="inline w-4 h-4 mr-1"></span> Luyện Pinyin</button>
+      <button data-tab="lesson" class="tab-btn px-4 py-2 text-sm font-semibold tab-inactive"><span data-lucide="book-open" class="inline w-4 h-4 mr-1"></span> Bài học</button>
+      <button data-tab="ai" class="tab-btn px-4 py-2 text-sm font-semibold tab-inactive"><span data-lucide="sparkles" class="inline w-4 h-4 mr-1"></span> Trợ lý AI</button>
+    </nav>
+
+    <!-- ==================== TAB: DASHBOARD ==================== -->
+    <section id="tab-dashboard" class="tab-panel space-y-6">
+      <div class="soft-card p-6">
+        <h2 id="greeting" class="text-2xl font-bold text-ink">Buổi sáng vui vẻ nhé Thảo! ✨</h2>
+        <p class="text-ink/60 mt-1">Hôm nay hãy cùng nhau chinh phục thêm vài từ vựng HSK nhé.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="soft-card p-6 text-center">
+          <div class="text-4xl mb-2">🔥</div>
+          <div id="streak-count" class="text-3xl font-bold text-rosegold">0</div>
+          <div class="text-sm text-ink/60 mt-1">Ngày streak liên tiếp</div>
+        </div>
+        <div class="soft-card p-6 text-center">
+          <div class="text-4xl mb-2">⭐</div>
+          <div id="xp-count" class="text-3xl font-bold text-sage">0</div>
+          <div class="text-sm text-ink/60 mt-1">Tổng XP</div>
+        </div>
+        <div class="soft-card p-6 text-center">
+          <div class="text-4xl mb-2">📚</div>
+          <div id="words-count" class="text-3xl font-bold text-ink">0</div>
+          <div class="text-sm text-ink/60 mt-1">Từ vựng đã học</div>
+        </div>
+      </div>
+
+      <!-- XP Progress -->
+      <div class="soft-card p-6">
+        <div class="flex justify-between text-sm font-medium mb-2">
+          <span class="text-ink/70">Tiến trình lên cấp HSK</span>
+          <span id="hsk-level" class="text-rosegold font-bold">HSK 1</span>
+        </div>
+        <div class="w-full h-4 bg-rosegold/10 rounded-full overflow-hidden">
+          <div id="xp-bar" class="h-full bg-gradient-to-r from-rosegold to-sage rounded-full transition-all duration-500" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <button onclick="switchTab('lesson')" class="soft-card p-6 text-left hover:shadow-lg transition group">
+          <div class="text-3xl mb-2">📖</div>
+          <div class="font-bold text-ink">Học Bài Mới</div>
+          <div class="text-sm text-ink/50">Tiếp tục giáo trình HSK</div>
+        </button>
+        <button onclick="switchTab('ai')" class="soft-card p-6 text-left hover:shadow-lg transition group">
+          <div class="text-3xl mb-2">🤖</div>
+          <div class="font-bold text-ink">Tra Từ AI</div>
+          <div class="text-sm text-ink/50">Từ điển & trợ lý ngữ pháp</div>
+        </button>
+      </div>
+
+      <!-- ✅ Daily Check-in -->
+      <div class="soft-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="font-bold text-xl text-ink">Điểm danh mỗi ngày</h3>
+          <p class="text-sm text-ink/60 mt-1">Duy trì streak bằng cách điểm danh hôm nay.</p>
+        </div>
+        <button id="checkin-btn" class="btn-primary px-6 py-3 whitespace-nowrap">Điểm danh hôm nay 🌸</button>
+      </div>
+
+      <!-- 📝 Ghi chú học tập -->
+      <div class="soft-card p-6">
+        <h3 class="font-bold text-xl mb-4 text-ink">Ghi chú học tập 📝</h3>
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <input id="note-input" type="text" placeholder="Viết ghi chú mới..." class="flex-1 px-4 py-2.5 rounded-full border border-rosegold/30 bg-white focus:outline-none focus:ring-2 focus:ring-rosegold/40" />
+          <button id="add-note-btn" class="btn-sage px-5 py-2.5 whitespace-nowrap">Thêm ghi chú</button>
+        </div>
+        <div id="notes-list" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: PINYIN STATION ==================== -->
+    <section id="tab-pinyin" class="tab-panel hidden space-y-6">
+      <div class="soft-card p-6">
+        <h2 class="text-2xl font-bold text-ink mb-4">Bảng phiên âm Pinyin</h2>
+        <p class="text-sm text-ink/60 mb-6">Nhấn vào một ô để nghe 4 thanh điệu.</p>
+        <div id="pinyin-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: LESSON (HSK) ==================== -->
+    <section id="tab-lesson" class="tab-panel hidden space-y-6">
+      <div class="soft-card p-6">
+        <h2 class="text-2xl font-bold text-ink mb-2">Bài học theo cấp độ HSK</h2>
+        <p class="text-sm text-ink/60 mb-6">Chọn cấp độ để học từ vựng. <span class="text-rosegold font-semibold">Nhấp vào từ bất kỳ</span> để AI tạo 5-10 câu hỏi thuộc bài!</p>
+        
+        <!-- Chọn cấp độ HSK -->
+        <div class="flex flex-wrap gap-2 mb-8" id="hsk-level-selector"></div>
+
+        <!-- Khu vực hiển thị nội dung bài học -->
+        <div id="lesson-content-area" class="space-y-6">
+          <!-- Sẽ được điền bằng JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: AI ASSISTANT ==================== -->
+    <section id="tab-ai" class="tab-panel hidden space-y-6">
+      <div class="soft-card p-0 overflow-hidden bg-white/40 backdrop-blur-xl border-white/60 shadow-xl">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-rosegold/80 to-rosegold/60 p-6 text-white flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl backdrop-blur-md shadow-inner border border-white/30">🤖</div>
+            <div>
+              <h2 class="text-xl font-bold">Trợ lý AI Thảo</h2>
+              <div class="flex items-center gap-1.5 text-xs opacity-90 mt-0.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span> Sẵn sàng hỗ trợ (Trực tuyến)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 p-4 bg-white/30 border-b border-rosegold/10 overflow-x-auto no-scrollbar">
+          <button data-ai-tab="dictionary" class="ai-tab-btn px-5 py-2.5 rounded-2xl text-sm font-bold bg-white text-rosegold shadow-sm border border-rosegold/20 transition-all">📖 Tra Từ</button>
+          <button data-ai-tab="grammar" class="ai-tab-btn px-5 py-2.5 rounded-2xl text-sm font-bold bg-transparent text-ink/60 hover:bg-white/50 transition-all">✍️ Ngữ pháp</button>
+          <button data-ai-tab="roleplay" class="ai-tab-btn px-5 py-2.5 rounded-2xl text-sm font-bold bg-transparent text-ink/60 hover:bg-white/50 transition-all">💬 Đóng vai</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-6">
+          
+          <!-- Dictionary Panel -->
+          <div id="ai-dictionary" class="ai-panel flex flex-col space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+              <input id="dict-query" type="text" placeholder="Nhập từ hoặc chữ Hán, ví dụ: 你好..." class="w-full px-4 py-3 rounded-xl border border-rosegold/30 bg-white focus:outline-none focus:ring-2 focus:ring-rosegold/50" />
+              <button id="dict-search" class="px-6 py-3 rounded-xl btn-primary font-semibold whitespace-nowrap">Tra cứu</button>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full">
+              <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('dict-query').value='你好'; document.getElementById('dict-search').click();">Từ vựng: 你好</button>
+              <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('dict-query').value='Hôm nay bạn thế nào?'; document.getElementById('dict-search').click();">Dịch: Hôm nay bạn thế nào?</button>
+              <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('dict-query').value='Phân biệt 的, 得 và 地'; document.getElementById('dict-search').click();">Phân biệt 的 - 得 - 地</button>
+            </div>
+            <div class="w-full min-h-[140px] p-4 bg-white/70 rounded-2xl border border-rosegold/20 text-sm whitespace-pre-wrap relative">
+              <span class="absolute top-4 right-4 text-2xl opacity-10">📖</span>
+              <span id="dict-result-text" class="text-ink">Nhập từ cần tra cứu vào ô bên trên nhé! 🌸</span>
+            </div>
+          </div>
+
+          <!-- Grammar Panel -->
+          <div id="ai-grammar" class="ai-panel hidden flex flex-col space-y-4">
+            <textarea id="grammar-sentence" rows="3" placeholder="Nhập câu tiếng Trung bạn muốn kiểm tra..." class="w-full px-4 py-3 rounded-xl border border-rosegold/30 bg-white focus:outline-none focus:ring-2 focus:ring-rosegold/50 resize-none"></textarea>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+              <div class="flex flex-wrap gap-2 flex-1">
+                <button class="px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('grammar-sentence').value='我吃饭了没。';">Ví dụ: 我吃饭了没。</button>
+                <button class="px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('grammar-sentence').value='他是很好人。';">Ví dụ: 他是很好人。</button>
+              </div>
+              <button id="grammar-check-btn" class="px-6 py-3 rounded-xl btn-sage font-semibold whitespace-nowrap">Kiểm tra</button>
+            </div>
+            <div class="w-full min-h-[140px] p-4 bg-white/70 rounded-2xl border border-rosegold/20 text-sm whitespace-pre-wrap relative">
+              <span class="absolute top-4 right-4 text-2xl opacity-10">✍️</span>
+              <span id="grammar-result-text" class="text-ink">AI sẽ phân tích lỗi sai và gợi ý cách sửa câu cho bạn. ✨</span>
+            </div>
+          </div>
+
+          <!-- Roleplay Panel -->
+          <div id="ai-roleplay" class="ai-panel hidden flex flex-col space-y-4">
+            <div class="flex gap-3 items-center bg-white/50 p-2 rounded-2xl border border-white/60">
+              <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">🎭</div>
+              <div class="flex-1">
+                <select id="scenario-select" class="w-full bg-transparent text-sm font-bold text-ink focus:outline-none cursor-pointer">
+                  <option value="restaurant">Nhà hàng (Restaurant)</option>
+                  <option value="hotel">Khách sạn (Hotel)</option>
+                  <option value="shopping">Mua sắm (Shopping)</option>
+                  <option value="taxi">Gọi Taxi (Taxi)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="roleplay-chat" class="h-80 overflow-y-auto no-scrollbar bg-white/40 backdrop-blur-md rounded-3xl border border-white/60 p-5 flex flex-col gap-4 shadow-inner">
+              <div class="flex gap-3 max-w-[85%] self-start">
+                <div class="w-8 h-8 rounded-full bg-white flex-shrink-0 flex items-center justify-center text-sm shadow border border-rosegold/20">🤖</div>
+                <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-white text-sm text-ink leading-relaxed">
+                  Chào Thảo! Hãy chọn một bối cảnh và chúng ta cùng bắt đầu luyện hội thoại nhé. Mình sẽ đóng vai người bản xứ! 🌸
+                </div>
+              </div>
+            </div>
+
+            <div class="relative mt-2">
+              <input id="roleplay-input" type="text" placeholder="Nhập tin nhắn của bạn..." class="w-full pl-5 pr-14 py-3.5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rosegold/50 shadow-inner" />
+              <button id="roleplay-send" class="absolute right-2 top-2 bottom-2 w-10 bg-rosegold text-white rounded-xl flex items-center justify-center shadow hover:bg-rosegold/80 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full">
+               <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('roleplay-input').value='你好！'; document.getElementById('roleplay-send').click();">👋 你好！</button>
+               <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('roleplay-input').value='多少钱？'; document.getElementById('roleplay-send').click();">💰 多少钱？</button>
+               <button class="prompt-chip px-3 py-1.5 rounded-full bg-white/80 text-xs border border-rosegold/20 hover:bg-rosegold/10 transition" onclick="document.getElementById('roleplay-input').value='太贵了！'; document.getElementById('roleplay-send').click();">📉 太贵了！</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Pinyin Modal -->
+  <div id="pinyin-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="soft-card p-8 w-full max-w-sm text-center">
+      <h3 class="text-lg font-bold mb-2">Âm tiết</h3>
+      <div id="pinyin-modal-syllable" class="text-5xl font-chinese font-bold text-rosegold mb-6"></div>
+      <div class="grid grid-cols-4 gap-3">
+        <button class="tone-btn btn-sage py-3" data-tone="1">Tone 1</button>
+        <button class="tone-btn btn-sage py-3" data-tone="2">Tone 2</button>
+        <button class="tone-btn btn-sage py-3" data-tone="3">Tone 3</button>
+        <button class="tone-btn btn-sage py-3" data-tone="4">Tone 4</button>
+      </div>
+      <button id="close-pinyin-modal" class="mt-6 text-sm text-ink/50 hover:text-ink">Đóng</button>
+    </div>
+  </div>
+
+  <!-- 🤖 AI VOCAB QUIZ MODAL (Nâng cấp) -->
+  <div id="word-quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="quiz-modal-card w-full max-w-xl relative">
+      <button id="close-word-quiz-modal" class="absolute top-4 right-4 text-ink/40 hover:text-ink font-bold text-lg z-10">✕</button>
+      
+      <div id="word-quiz-loading" class="text-center py-12 space-y-6">
+        <div class="text-6xl animate-bounce">🤖</div>
+        <h3 class="text-2xl font-bold text-rosegold">AI đang soạn bài tập...</h3>
+        <p class="text-sm text-ink/60">Gemini đang tạo 5 câu hỏi ôn tập cho từ vựng này. Vui lòng chờ xíu nhé! ✨</p>
+        <div class="w-16 h-16 border-4 border-rosegold/20 border-t-rosegold rounded-full animate-spin mx-auto"></div>
+      </div>
+
+      <div id="word-quiz-content" class="hidden space-y-5">
+        <!-- Header with progress and word info (updated layout) -->
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <span id="modal-quiz-progress" class="text-sm font-bold text-sage whitespace-nowrap">Câu 1/5</span>
+          <div class="flex-1 h-2 bg-rosegold/10 rounded-full overflow-hidden">
+            <div id="modal-quiz-progress-bar" class="quiz-progress-bar" style="width: 0%;"></div>
+          </div>
+          <div class="flex items-center gap-2 whitespace-nowrap">
+            <span id="modal-word-hanzi" class="font-chinese text-2xl text-ink font-bold"></span>
+            <span id="modal-word-pinyin" class="text-rosegold text-sm font-medium"></span>
+          </div>
+        </div>
+
+        <!-- Quiz body -->
+        <div id="modal-quiz-body" class="space-y-4">
+          <!-- Điền nội dung câu hỏi -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // ========== FIREBASE CONFIG ==========
+    const firebaseConfig = {
+      apiKey: "AIzaSyCq4NzLFbtbY0K-U9HoCxKiC2DGby7ZTp8",
+      authDomain: "thao-chinese-hub.firebaseapp.com",
+      projectId: "thao-chinese-hub",
+      storageBucket: "thao-chinese-hub.firebasestorage.app",
+      messagingSenderId: "545290895157",
+      appId: "1:545290895157:web:7611eca2860c676169167c",
+      measurementId: "G-VDYDRVTMC2"
+    };
+
+    // ========== AUTHORIZED EMAILS ==========
+    const AUTHORIZED_EMAILS = [
+      "tathanh7777@gmail.com",
+      "ln2488337@gmail.com"
+    ];
+
+    // ========== IMPORTS ==========
+    import { initializeApp } from 'firebase/app';
+    import { 
+      getAuth, 
+      GoogleAuthProvider, 
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'firebase/auth';
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      updateDoc, 
+      increment, 
+      collection, 
+      addDoc, 
+      query, 
+      where, 
+      getDocs, 
+      serverTimestamp,
+      deleteDoc,
+      runTransaction
+    } from 'firebase/firestore';
+
+    // ========== INIT FIREBASE ==========
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ========== BACKEND URLS (TÁCH BIỆT) ==========
+    const AI_BASE = 'https://thao-chinese-hub-backend.onrender.com/api/ai';   // Backend cũ: Tra từ, Ngữ pháp, Đóng vai
+    const QUIZ_BASE = 'https://quiz-t-backend.onrender.com/api/ai';                // Backend mới: Tạo câu hỏi AI Quiz
+
+    // ========== STATE ==========
+    let currentUser = null;
+    let userProfile = null;
+    let currentPinyinSyllable = '';
+    let hskData = {};           // { hsk1: [...], hsk2: [...] }
+    let selectedHskLevel = null;
+    let currentQuizWords = [];  // từ vựng đang quiz tổng hợp
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let quizCompletedWords = [];
+
+    // Word AI Quiz State
+    let activeWord = null;
+    let wordQuizQuestions = [];
+    let wordQuizIndex = 0;
+    let wordQuizScore = 0;
+    let wordQuizAnswered = false; // <-- Thêm biến này
+
+    // ========== ENCOURAGEMENT MESSAGES ==========
+    const CORRECT_MESSAGES = [
+      "Xuất sắc quá Thảo ơi! 🌸",
+      "Đúng rồi, đỉnh thật sự! ✨",
+      "Quá giỏi, tiếp tục phát huy nhé! 🎉",
+      "Thông minh lắm Thảo! 💫",
+      "Chính xác! Bạn làm tốt lắm! 🌷",
+      "Tuyệt vời! Không có gì làm khó được bạn! 💪"
+    ];
+    const INCORRECT_MESSAGES = [
+      "Không sao đâu, làm lại lần nữa nhé! 💪",
+      "Chút nữa là đúng rồi, cố lên Thảo ơi! 🌸",
+      "Sai một ly đi một dặm, học từ lỗi sai nào! ✨",
+      "Đừng nản nha, thử đáp án khác xem! 🌷",
+      "Ai cũng có lúc sai, quan trọng là không bỏ cuộc! 💖",
+      "Gần đúng rồi, hãy xem lại nhé! 🌱"
+    ];
+
+    function getRandomMessage(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // ========== DOM UTILS ==========
+    const $ = (id) => document.getElementById(id);
+    function show(id) { 
+      const el = $(id);
+      if (el) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      }
+    }
+    function hide(id) { 
+      const el = $(id);
+      if (el) {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    }
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const activePanel = document.getElementById(`tab-${tabId}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('tab-inactive');
+      });
+      const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.remove('tab-inactive');
+        activeBtn.classList.add('tab-active');
+      }
+
+      if (window.lucide) lucide.createIcons();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (tabId === 'lesson') {
+        renderLessonTab();
+      }
+    }
+    window.switchTab = switchTab;
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // ========== AUTH ==========
+    function showLoginModal() { show('login-modal'); }
+    function hideLoginModal() { hide('login-modal'); }
+    function showLockOverlay() { show('lock-overlay'); }
+    function hideLockOverlay() { hide('lock-overlay'); }
+
+    function displayErrorMessage(msg) { alert(msg); }
+
+    $('google-login-btn')?.addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (e) {
+        displayErrorMessage(e.message);
+      }
+    });
+
+    $('login-btn')?.addEventListener('click', async () => {
+      const email = $('login-email').value.trim();
+      const pass = $('login-password').value;
+      if (!email || !pass) {
+        displayErrorMessage('Vui lòng nhập đầy đủ Email và Mật khẩu.');
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (e) {
+        displayErrorMessage('Đăng nhập thất bại: ' + e.message);
+      }
+    });
+
+    $('register-btn')?.addEventListener('click', async () => {
+      const email = $('login-email').value.trim();
+      const pass = $('login-password').value;
+      if (!email || !pass) {
+        displayErrorMessage('Vui lòng nhập Email và Mật khẩu để đăng ký.');
+        return;
+      }
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+      } catch (e) {
+        displayErrorMessage('Đăng ký thất bại: ' + e.message);
+      }
+    });
+
+    $('logout-btn')?.addEventListener('click', async () => {
+      await signOut(auth);
+      showLoginModal();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        if (!AUTHORIZED_EMAILS.includes(user.email.toLowerCase())) {
+          showLockOverlay();
+          hideLoginModal();
+          return;
+        }
+        currentUser = user;
+        $('header-user-email').textContent = user.email;
+        hideLoginModal();
+        hideLockOverlay();
+        await loadProfile();
+        await loadNotes();
+        await loadHSKData();
+        renderCheckinState();
+        updateDashboard();
+        renderPinyinGrid();
+        renderLessonTab();
+      } else {
+        currentUser = null;
+        $('header-user-email').textContent = '';
+        showLoginModal();
+        hideLockOverlay();
+      }
+    });
+
+    // ========== FIRESTORE HELPERS ==========
+    async function loadProfile() {
+      try {
+        const ref = doc(db, 'users', currentUser.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          userProfile = { 
+            streak: 0, 
+            total_xp: 0, 
+            last_checkin_date: null,
+            last_study_date: null
+          };
+          await setDoc(ref, userProfile);
+        } else {
+          userProfile = snap.data();
+          if (userProfile.last_checkin_date && userProfile.last_checkin_date.toDate) {
+            userProfile.last_checkin_date = userProfile.last_checkin_date.toDate();
+          }
+          if (userProfile.last_study_date && userProfile.last_study_date.toDate) {
+            userProfile.last_study_date = userProfile.last_study_date.toDate();
+          }
+        }
+      } catch (e) {
+        console.warn('Không thể tải profile từ Firestore, dùng dữ liệu mặc định:', e);
+        userProfile = { 
+          streak: 0, 
+          total_xp: 0, 
+          last_checkin_date: null,
+          last_study_date: null
+        };
+      }
+    }
+
+    async function getTotalLearnedWords() {
+      if (!currentUser) return 0;
+      try {
+        const progressCol = collection(db, 'users', currentUser.uid, 'progress');
+        const snap = await getDocs(progressCol);
+        let total = 0;
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.completed_words && Array.isArray(data.completed_words)) {
+            total += data.completed_words.length;
+          }
+        });
+        return total;
+      } catch (e) {
+        console.warn('Không thể đếm từ đã học:', e);
+        return 0;
+      }
+    }
+
+    function isSameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    async function updateStreakAndXP(xpEarned) {
+      if (!currentUser) return;
+      try {
+        const ref = doc(db, 'users', currentUser.uid);
+        const today = new Date();
+        let streak = userProfile.streak || 0;
+        
+        let lastDate = null;
+        if (userProfile.last_study_date) {
+          if (userProfile.last_study_date.toDate) {
+            lastDate = userProfile.last_study_date.toDate();
+          } else if (userProfile.last_study_date instanceof Date) {
+            lastDate = userProfile.last_study_date;
+          }
+        }
+
+        if (lastDate) {
+          if (!isSameDay(lastDate, today)) {
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            streak = isSameDay(lastDate, yesterday) ? streak + 1 : 1;
+          }
+        } else {
+          streak = 1;
+        }
+
+        await updateDoc(ref, {
+          total_xp: increment(xpEarned),
+          streak,
+          last_study_date: serverTimestamp()
+        });
+        userProfile.streak = streak;
+        userProfile.total_xp += xpEarned;
+        userProfile.last_study_date = today;
+        updateDashboard();
+      } catch (e) {
+        console.warn('Không thể cập nhật streak/XP:', e);
+      }
+    }
+
+    // ========== DAILY CHECK-IN ==========
+    function renderCheckinState() {
+      const btn = $('checkin-btn');
+      if (!btn) return;
+      let lastCheckin = null;
+      if (userProfile?.last_checkin_date) {
+        if (userProfile.last_checkin_date.toDate) lastCheckin = userProfile.last_checkin_date.toDate();
+        else if (userProfile.last_checkin_date instanceof Date) lastCheckin = userProfile.last_checkin_date;
+      }
+      const checked = lastCheckin && isSameDay(lastCheckin, new Date());
+      if (checked) {
+        btn.textContent = 'Đã điểm danh hôm nay 🎉';
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.textContent = 'Điểm danh hôm nay 🌸';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    async function checkinDaily() {
+      if (!currentUser) return;
+      if (!userProfile) {
+        await loadProfile();
+      }
+
+      const profileRef = doc(db, 'users', currentUser.uid);
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const profileSnap = await transaction.get(profileRef);
+          if (!profileSnap.exists()) {
+            transaction.set(profileRef, {
+              streak: 1,
+              total_xp: 20,
+              last_checkin_date: serverTimestamp(),
+              last_study_date: serverTimestamp()
+            });
+            return;
+          }
+
+          const data = profileSnap.data();
+          let lastCheckin = null;
+          if (data.last_checkin_date) {
+            if (data.last_checkin_date.toDate) lastCheckin = data.last_checkin_date.toDate();
+            else if (data.last_checkin_date instanceof Date) lastCheckin = data.last_checkin_date;
+          }
+
+          const today = new Date();
+          if (lastCheckin && isSameDay(lastCheckin, today)) {
+            return;
+          }
+
+          const newStreak = (data.streak || 0) + 1;
+          transaction.update(profileRef, {
+            streak: newStreak,
+            total_xp: increment(20),
+            last_checkin_date: serverTimestamp(),
+            last_study_date: serverTimestamp()
+          });
+        });
+
+        userProfile.streak = (userProfile.streak || 0) + 1;
+        userProfile.total_xp = (userProfile.total_xp || 0) + 20;
+        userProfile.last_checkin_date = new Date();
+        userProfile.last_study_date = new Date();
+
+        updateDashboard();
+        renderCheckinState();
+        confetti({ particleCount: 150, spread: 70 });
+      } catch (error) {
+        console.error('Điểm danh thất bại:', error);
+      }
+    }
+
+    // ========== GHI CHÚ ==========
+    async function loadNotes() {
+      const notesList = $('notes-list');
+      if (!notesList) return;
+      try {
+        const snap = await getDocs(collection(db, 'notes'));
+        const notes = [];
+        snap.forEach(doc => notes.push({ id: doc.id, ...doc.data() }));
+
+        notes.sort((a, b) => {
+          const aTime = a.created_at?.toDate ? a.created_at.toDate().getTime() : (a.created_at instanceof Date ? a.created_at.getTime() : 0);
+          const bTime = b.created_at?.toDate ? b.created_at.toDate().getTime() : (b.created_at instanceof Date ? b.created_at.getTime() : 0);
+          return bTime - aTime;
+        });
+
+        if (notes.length === 0) {
+          notesList.innerHTML = '<p class="text-sm text-ink/50">Chưa có ghi chú nào. Hãy thêm ghi chú đầu tiên nhé!</p>';
+          return;
+        }
+
+        notesList.innerHTML = notes.map(n => `
+          <div class="flex items-center justify-between bg-white/80 border border-rosegold/20 rounded-2xl px-4 py-3">
+            <p class="text-sm text-ink whitespace-pre-wrap">${escapeHtml(n.content || '')}</p>
+            <button class="delete-note-btn text-rosegold hover:text-ink text-sm font-semibold ml-4" data-note-id="${n.id}">Xóa</button>
+          </div>
+        `).join('');
+
+        notesList.querySelectorAll('.delete-note-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            try {
+              await deleteDoc(doc(db, 'notes', btn.dataset.noteId));
+              await loadNotes();
+            } catch (e) {
+              console.warn('Không thể xóa ghi chú:', e);
+            }
+          });
+        });
+      } catch (e) {
+        console.warn('Không thể tải ghi chú:', e);
+        notesList.innerHTML = '<p class="text-sm text-ink/50">Không thể tải ghi chú do lỗi kết nối.</p>';
+      }
+    }
+
+    async function addNote() {
+      const input = $('note-input');
+      const content = input.value.trim();
+      if (!content) return;
+      try {
+        await addDoc(collection(db, 'notes'), {
+          content,
+          created_at: serverTimestamp()
+        });
+        input.value = '';
+        await loadNotes();
+      } catch (e) {
+        console.warn('Không thể thêm ghi chú:', e);
+      }
+    }
+
+    // ========== PINYIN ==========
+    const initials = ['', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's', 'y', 'w'];
+    const finals = ['a', 'o', 'e', 'i', 'u', 'ü', 'ai', 'ei', 'ui', 'ao', 'ou', 'iu', 'ie', 'üe', 'er', 'an', 'en', 'in', 'un', 'ün', 'ang', 'eng', 'ing', 'ong'];
+
+    function renderPinyinGrid() {
+      const grid = $('pinyin-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      initials.forEach(initial => {
+        finals.forEach(final => {
+          const syllable = initial + final;
+          if (syllable === '' || syllable === 'er') return;
+          if (initial === '' && ['i', 'u', 'ü'].includes(final)) return;
+          if (initial === 'y' && ['i', 'ü'].includes(final)) return;
+          if (initial === 'w' && ['u', 'ü'].includes(final)) return;
+          const btn = document.createElement('button');
+          btn.className = 'p-3 rounded-xl bg-white hover:bg-rosegold/10 border border-rosegold/20 font-chinese font-bold text-lg transition';
+          btn.textContent = syllable;
+          btn.onclick = () => openPinyinModal(syllable);
+          grid.appendChild(btn);
+        });
+      });
+    }
+
+    function openPinyinModal(syllable) {
+      currentPinyinSyllable = syllable;
+      $('pinyin-modal-syllable').textContent = syllable;
+      show('pinyin-modal');
+    }
+
+    function closePinyinModal() { hide('pinyin-modal'); }
+    $('close-pinyin-modal')?.addEventListener('click', closePinyinModal);
+
+    function playPinyinAudio(syllable, tone) {
+      const path = `./audio/pinyin/${syllable.toLowerCase()}${tone}.mp3`;
+      const audio = new Audio(path);
+      audio.play().catch(() => {
+        const utter = new SpeechSynthesisUtterance(syllable);
+        utter.lang = 'zh-CN';
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      });
+    }
+
+    document.querySelectorAll('.tone-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playPinyinAudio(currentPinyinSyllable, parseInt(btn.dataset.tone));
+      });
+    });
+
+    // ========== LESSON (HSK) ==========
+    const HSK_LEVELS = ['hsk1', 'hsk2', 'hsk3', 'hsk4', 'hsk5', 'hsk6'];
+
+    async function loadHSKData() {
+      for (const level of HSK_LEVELS) {
+        try {
+          const res = await fetch(`json/${level}.json`);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            hskData[level] = data;
+          }
+        } catch (e) {
+          console.warn(`Không tải được ${level}.json`);
+        }
+      }
+      renderHSKSelector();
+      if (Object.keys(hskData).length > 0) {
+        selectedHskLevel = Object.keys(hskData)[0];
+        renderLessonTab();
+      } else {
+        $('lesson-content-area').innerHTML = '<p class="text-center text-ink/50">Không tìm thấy dữ liệu HSK. Vui lòng thêm các file JSON vào thư mục /json/.</p>';
+      }
+    }
+
+    function renderHSKSelector() {
+      const container = $('hsk-level-selector');
+      if (!container) return;
+      container.innerHTML = Object.keys(hskData).map(level => `
+        <button class="hsk-level-btn px-5 py-2 rounded-full font-semibold transition ${level === selectedHskLevel ? 'tab-active' : 'tab-inactive'}" data-level="${level}">
+          ${level.toUpperCase()}
+        </button>
+      `).join('');
+      container.querySelectorAll('.hsk-level-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedHskLevel = btn.dataset.level;
+          renderHSKSelector();
+          renderLessonTab();
+        });
+      });
+    }
+
+    function renderLessonTab() {
+      const area = $('lesson-content-area');
+      if (!area || !selectedHskLevel || !hskData[selectedHskLevel]) return;
+
+      const words = hskData[selectedHskLevel];
+      const progressRef = doc(db, 'users', currentUser.uid, 'progress', selectedHskLevel);
+      getDoc(progressRef).then(progressSnap => {
+        const completed = progressSnap.exists() && progressSnap.data().completed_words ? progressSnap.data().completed_words : [];
+        area.innerHTML = `
+          <div class="bg-white/80 rounded-2xl border border-rosegold/20 p-5">
+            <h3 class="font-bold text-xl mb-3">Danh sách từ vựng ${selectedHskLevel.toUpperCase()} (${words.length} từ)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${words.map((w) => `
+                <div class="vocab-card bg-white border border-rosegold/20 hover:border-rosegold/60 hover:shadow-md transition cursor-pointer rounded-xl p-4 flex flex-col group relative" data-word-id="${w.id}">
+                  <div class="flex items-start justify-between">
+                    <span class="font-chinese text-2xl group-hover:text-rosegold transition">${w.hanzi}</span>
+                    <span class="word-status-badge text-xs px-2.5 py-1 rounded-full font-medium ${completed.includes(w.id) ? 'bg-sage/20 text-sage' : 'bg-rosegold/10 text-rosegold'}">
+                      ${completed.includes(w.id) ? 'Đã học ✨' : 'Chưa học'}
+                    </span>
+                  </div>
+                  <span class="text-rosegold font-medium mt-1">${w.pinyin}</span>
+                  <span class="text-sm text-ink/70 mt-1">${w.translations ? w.translations.join(', ') : ''}</span>
+                  <div class="mt-2 text-xs text-rosegold opacity-0 group-hover:opacity-100 transition font-semibold">✨ Nhấp để làm 5 câu AI Quiz</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button id="start-flashcard" class="btn-primary px-6 py-3">🎴 Học bằng Flashcard</button>
+            <button id="start-quiz" class="btn-sage px-6 py-3">📝 Làm bài tập tổng hợp</button>
+          </div>
+          <div id="flashcard-area" class="hidden"></div>
+          <div id="quiz-area" class="hidden"></div>
+        `;
+
+        // Gắn sự kiện click vào thẻ từ vựng (sửa lỗi so sánh id)
+        area.querySelectorAll('.vocab-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const wordId = card.dataset.wordId;
+            const wordObj = words.find(w => String(w.id) === String(wordId)); // Sửa tại đây
+            if (wordObj) {
+              startSingleWordAIQuiz(wordObj);
+            } else {
+              console.warn('Không tìm thấy từ vựng với id:', wordId);
+            }
+          });
+        });
+
+        $('start-flashcard').addEventListener('click', () => startFlashcards(words));
+        $('start-quiz').addEventListener('click', () => startQuiz(words, progressRef));
+      }).catch(e => {
+        console.warn('Không thể tải tiến độ cho cấp độ HSK:', e);
+      });
+    }
+
+    // ========== SINGLE WORD AI QUIZ FEATURE (NÂNG CẤP) ==========
+    async function startSingleWordAIQuiz(word) {
+      activeWord = word;
+      wordQuizQuestions = [];
+      wordQuizIndex = 0;
+      wordQuizScore = 0;
+      wordQuizAnswered = false; // reset
+
+      // Show modal in loading state
+      $('modal-word-hanzi').textContent = word.hanzi;
+      $('modal-word-pinyin').textContent = word.pinyin;
+      $('modal-quiz-progress').textContent = 'Đang tải...';
+      $('modal-quiz-progress-bar').style.width = '0%';
+      show('word-quiz-loading');
+      hide('word-quiz-content');
+      show('word-quiz-modal');
+
+      try {
+        // Gọi backend mới cho việc tạo quiz
+        const response = await fetch(`${QUIZ_BASE}/vocab-quiz`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word: word, count: 5 })
+        });
+        const data = await response.json();
+
+        if (data.result && Array.isArray(data.result) && data.result.length > 0) {
+          wordQuizQuestions = data.result;
+          hide('word-quiz-loading');
+          show('word-quiz-content');
+          renderWordQuizStep();
+        } else {
+          alert('Không thể tạo câu hỏi tự động. Vui lòng thử lại sau.');
+          hide('word-quiz-modal');
+        }
+      } catch (e) {
+        console.error('Lỗi khi tải AI Quiz:', e);
+        alert('Không thể kết nối với Quiz Backend.');
+        hide('word-quiz-modal');
+      }
+    }
+
+    function renderWordQuizStep() {
+      if (wordQuizIndex >= wordQuizQuestions.length) {
+        finishWordQuiz();
+        return;
+      }
+
+      const q = wordQuizQuestions[wordQuizIndex];
+      wordQuizAnswered = false; // reset trạng thái đã trả lời
+      $('modal-quiz-progress').textContent = `Câu ${wordQuizIndex + 1}/${wordQuizQuestions.length}`;
+      const percent = ((wordQuizIndex) / wordQuizQuestions.length) * 100;
+      $('modal-quiz-progress-bar').style.width = `${percent}%`;
+
+      const body = $('modal-quiz-body');
+      body.innerHTML = `
+        <div class="space-y-5">
+          <p class="font-semibold text-ink text-base leading-relaxed">${escapeHtml(q.question)}</p>
+          <div class="grid grid-cols-2 gap-3">
+            ${q.options.map((opt) => `
+              <button class="quiz-option-btn w-full text-left bg-white border border-rosegold/25 rounded-2xl py-3.5 px-5 transition text-sm font-medium" data-opt="${escapeHtml(opt)}">
+                ${escapeHtml(opt)}
+              </button>
+            `).join('')}
+          </div>
+          <div id="modal-quiz-feedback" class="hidden text-sm p-4 rounded-2xl bg-sage/10 text-ink leading-relaxed"></div>
+          <div class="flex justify-end">
+            <button id="next-question-btn" class="btn-primary px-6 py-2.5 hidden">Câu tiếp theo →</button>
+          </div>
+        </div>
+      `;
+
+      body.querySelectorAll('.quiz-option-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleWordQuizAnswer(btn, q));
+      });
+
+      const nextBtn = document.getElementById('next-question-btn');
+      nextBtn?.addEventListener('click', () => {
+        if (wordQuizIndex === wordQuizQuestions.length - 1) {
+          // Nếu là câu cuối, gọi finishWordQuiz
+          finishWordQuiz();
+        } else {
+          wordQuizIndex++;
+          renderWordQuizStep();
+        }
+      });
+    }
+
+    function handleWordQuizAnswer(selectedBtn, q) {
+      if (wordQuizAnswered) return; // Nếu đã trả lời rồi thì không làm gì nữa
+      wordQuizAnswered = true;
+      const isCorrect = selectedBtn.dataset.opt === q.answer;
+      const feedbackEl = $('modal-quiz-feedback');
+
+      // Disable all buttons
+      document.querySelectorAll('.quiz-option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.opt === q.answer) {
+          b.classList.add('correct');
+        } else if (b === selectedBtn && !isCorrect) {
+          b.classList.add('incorrect');
+        }
+      });
+
+      if (isCorrect) {
+        wordQuizScore++;
+        // Pháo hoa và lời khen
+        confetti({ particleCount: 120, spread: 60, origin: { y: 0.8 } });
+        const msg = getRandomMessage(CORRECT_MESSAGES);
+        feedbackEl.innerHTML = `
+          <div class="encouragement-text text-sage font-bold mb-1">${msg}</div>
+          ${q.explanation ? `<div class="text-ink/70 mt-1">💡 ${escapeHtml(q.explanation)}</div>` : ''}
+        `;
+        feedbackEl.classList.remove('hidden');
+      } else {
+        const msg = getRandomMessage(INCORRECT_MESSAGES);
+        feedbackEl.innerHTML = `
+          <div class="encouragement-text text-rosegold font-bold mb-1">${msg}</div>
+          ${q.explanation ? `<div class="text-ink/70 mt-1">💡 Giải thích: ${escapeHtml(q.explanation)}</div>` : ''}
+        `;
+        feedbackEl.classList.remove('hidden');
+      }
+
+      // Hiện nút "Câu tiếp theo" hoặc "Hoàn thành"
+      const nextBtn = document.getElementById('next-question-btn');
+      if (nextBtn) {
+        nextBtn.classList.remove('hidden');
+        if (wordQuizIndex === wordQuizQuestions.length - 1) {
+          nextBtn.textContent = 'Hoàn thành 🎉';
+        } else {
+          nextBtn.textContent = 'Câu tiếp theo →';
+        }
+      }
+    }
+
+    async function finishWordQuiz() {
+      const body = $('modal-quiz-body');
+      const totalQuestions = wordQuizQuestions.length;
+      const isPassed = wordQuizScore >= Math.ceil(totalQuestions / 2);
+
+      // Cập nhật progress bar hoàn thành
+      $('modal-quiz-progress-bar').style.width = '100%';
+
+      body.innerHTML = `
+        <div class="text-center py-6 space-y-4">
+          <div class="text-4xl">${isPassed ? '🎉' : '💪'}</div>
+          <h4 class="text-xl font-bold text-ink">${isPassed ? 'Xuất sắc quá Thảo ơi!' : 'Cố gắng thêm chút nữa nhé!'}</h4>
+          <p class="text-sm text-ink/70">Bạn trả lời đúng <strong>${wordQuizScore}/${totalQuestions}</strong> câu hỏi.</p>
+          <p class="text-xs text-sage font-semibold">${isPassed ? 'Từ vựng này đã được cập nhật thành "Đã học"! ✨' : 'Hãy ôn lại từ này và thử lại nhé! 🌸'}</p>
+        </div>
+      `;
+
+      if (isPassed && currentUser) {
+        try {
+          // Update Firestore
+          const progressRef = doc(db, 'users', currentUser.uid, 'progress', selectedHskLevel);
+          const snap = await getDoc(progressRef);
+          let completed = snap.exists() && snap.data().completed_words ? snap.data().completed_words : [];
+          if (!completed.includes(activeWord.id)) {
+            completed.push(activeWord.id);
+            await setDoc(progressRef, { completed_words: completed, last_studied: serverTimestamp() }, { merge: true });
+          }
+
+          await updateStreakAndXP(15);
+          confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+
+          // Update UI badge directly
+          const card = document.querySelector(`[data-word-id="${activeWord.id}"] .word-status-badge`);
+          if (card) {
+            card.textContent = 'Đã học ✨';
+            card.className = 'word-status-badge text-xs px-2.5 py-1 rounded-full font-medium bg-sage/20 text-sage';
+          }
+        } catch (e) {
+          console.warn('Lỗi cập nhật Firestore:', e);
+        }
+      }
+    }
+
+    $('close-word-quiz-modal')?.addEventListener('click', () => hide('word-quiz-modal'));
+
+    function startFlashcards(words) {
+      const area = $('flashcard-area');
+      area.classList.remove('hidden');
+      area.innerHTML = `
+        <h4 class="font-bold text-lg mb-4">Flashcard từ vựng</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          ${words.map(w => `
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front">
+                  <span class="font-chinese text-3xl">${w.hanzi}</span>
+                </div>
+                <div class="flip-card-back text-center">
+                  <span class="text-lg text-rosegold">${w.pinyin}</span>
+                  <span class="text-sm text-ink/70 mt-1">${w.translations ? w.translations.join(', ') : ''}</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      $('quiz-area').classList.add('hidden');
+    }
+
+    function startQuiz(words, progressRef) {
+      currentQuizWords = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(10, words.length));
+      currentQuizIndex = 0;
+      quizScore = 0;
+      quizCompletedWords = [];
+      $('flashcard-area').classList.add('hidden');
+      const area = $('quiz-area');
+      area.classList.remove('hidden');
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const area = $('quiz-area');
+      if (!area || currentQuizIndex >= currentQuizWords.length) {
+        finishQuiz();
+        return;
+      }
+      const word = currentQuizWords[currentQuizIndex];
+      area.innerHTML = `
+        <div class="bg-white/80 rounded-2xl border border-rosegold/20 p-6">
+          <div class="text-sm text-ink/50 mb-2">Câu ${currentQuizIndex + 1} / ${currentQuizWords.length}</div>
+          <div class="font-chinese text-5xl text-center mb-6">${word.hanzi}</div>
+          <p class="text-center text-ink/60 mb-4">Chọn nghĩa đúng:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${generateQuizOptions(word).map((opt, idx) => `
+              <button class="quiz-option bg-white hover:bg-rosegold/5 border border-rosegold/20 rounded-xl py-3 px-4 transition" data-option="${idx}">${opt}</button>
+            `).join('')}
+          </div>
+          <div id="quiz-feedback" class="text-center mt-4 font-semibold"></div>
+        </div>
+      `;
+      area.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', () => handleQuizAnswer(btn, word));
+      });
+    }
+
+    function generateQuizOptions(correctWord) {
+      const allWords = hskData[selectedHskLevel] || [];
+      const options = [correctWord.translations[0]];
+      const otherWords = allWords.filter(w => w.id !== correctWord.id);
+      for (let i = 0; i < 3; i++) {
+        if (i < otherWords.length) {
+          const randWord = otherWords[Math.floor(Math.random() * otherWords.length)];
+          if (randWord && randWord.translations && !options.includes(randWord.translations[0])) {
+            options.push(randWord.translations[0]);
+          }
+        }
+      }
+      return options.sort(() => Math.random() - 0.5);
+    }
+
+    function handleQuizAnswer(btn, word) {
+      const correct = word.translations.includes(btn.textContent.trim());
+      const feedback = $('quiz-feedback');
+      if (correct) {
+        quizScore++;
+        quizCompletedWords.push(word.id);
+        feedback.textContent = getRandomMessage(CORRECT_MESSAGES);
+        feedback.className = 'text-center mt-4 font-semibold text-sage';
+        confetti({ particleCount: 80, spread: 60 });
+      } else {
+        feedback.textContent = getRandomMessage(INCORRECT_MESSAGES);
+        feedback.className = 'text-center mt-4 font-semibold text-rosegold';
+        return;
+      }
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      setTimeout(() => {
+        currentQuizIndex++;
+        renderQuizQuestion();
+      }, 800);
+    }
+
+    async function finishQuiz() {
+      const area = $('quiz-area');
+      if (quizCompletedWords.length > 0 && currentUser) {
+        try {
+          const progressRef = doc(db, 'users', currentUser.uid, 'progress', selectedHskLevel);
+          const progressSnap = await getDoc(progressRef);
+          let existing = [];
+          if (progressSnap.exists() && progressSnap.data().completed_words) {
+            existing = progressSnap.data().completed_words;
+          }
+          const merged = [...new Set([...existing, ...quizCompletedWords])];
+          await setDoc(progressRef, {
+            completed_words: merged,
+            last_studied: serverTimestamp()
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Không thể lưu tiến trình quiz:', e);
+        }
+      }
+      area.innerHTML = `
+        <div class="bg-white/80 rounded-2xl border border-rosegold/20 p-6 text-center">
+          <div class="text-4xl mb-3">🎉</div>
+          <h4 class="text-xl font-bold mb-2">Hoàn thành bài tập!</h4>
+          <p class="text-ink/70">Điểm số: ${quizScore} / ${currentQuizWords.length}</p>
+          <button id="quiz-again" class="btn-primary mt-4">Làm lại</button>
+        </div>
+      `;
+      $('quiz-again').addEventListener('click', () => {
+        startQuiz(hskData[selectedHskLevel], doc(db, 'users', currentUser.uid, 'progress', selectedHskLevel));
+      });
+      await updateStreakAndXP(10);
+    }
+
+    // ========== DASHBOARD ==========
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'Buổi sáng vui vẻ nhé Thảo! ✨';
+      if (hour < 18) return 'Buổi chiều vui vẻ nhé Thảo! ✨';
+      return 'Buổi tối vui vẻ nhé Thảo! ✨';
+    }
+
+    async function updateDashboard() {
+      $('greeting').textContent = getGreeting();
+      $('streak-count').textContent = userProfile?.streak || 0;
+      $('xp-count').textContent = userProfile?.total_xp || 0;
+      const xpInLevel = (userProfile?.total_xp || 0) % 100;
+      $('xp-bar').style.width = `${xpInLevel}%`;
+      const levelCount = Object.keys(hskData).length || 1;
+      $('hsk-level').textContent = `HSK ${levelCount}`;
+      const words = await getTotalLearnedWords();
+      $('words-count').textContent = words;
+    }
+
+    // ========== AI ASSISTANT (Backend cũ) ==========
+    async function callAI(endpoint, payload) {
+      try {
+        const res = await fetch(`${AI_BASE}/${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        return data.result || data.error || 'Không có phản hồi.';
+      } catch (e) {
+        return '⚠️ Không thể kết nối. Hãy chắc chắn server Render đang chạy ở URL đã cấu hình.';
+      }
+    }
+
+    document.querySelectorAll('.ai-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ai-tab-btn').forEach(b => {
+          b.classList.remove('bg-white', 'text-rosegold', 'shadow-sm', 'border-rosegold/20');
+          b.classList.add('bg-transparent', 'text-ink/60');
+        });
+        btn.classList.remove('bg-transparent', 'text-ink/60');
+        btn.classList.add('bg-white', 'text-rosegold', 'shadow-sm', 'border-rosegold/20');
+        
+        const tab = btn.dataset.aiTab;
+        document.querySelectorAll('.ai-panel').forEach(p => {
+          p.classList.add('hidden');
+        });
+        const activePanel = document.getElementById(`ai-${tab}`);
+        if (activePanel) {
+          activePanel.classList.remove('hidden');
+        }
+      });
+    });
+
+    $('dict-search')?.addEventListener('click', async () => {
+      const query = $('dict-query').value.trim();
+      if (!query) return;
+      $('dict-result-text').textContent = '⏳ Hệ thống đang phân tích...';
+      const result = await callAI('dictionary', { query });
+      $('dict-result-text').textContent = result;
+    });
+
+    $('grammar-check-btn')?.addEventListener('click', async () => {
+      const sentence = $('grammar-sentence').value.trim();
+      if (!sentence) return;
+      $('grammar-result-text').textContent = '⏳ Hệ thống đang phân tích...';
+      const result = await callAI('grammar-check', { sentence });
+      $('grammar-result-text').textContent = result;
+    });
+
+    $('roleplay-send')?.addEventListener('click', sendRoleplayMessage);
+    $('roleplay-input')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendRoleplayMessage();
+    });
+
+    async function sendRoleplayMessage() {
+      const input = $('roleplay-input');
+      const message = input.value.trim();
+      if (!message) return;
+      input.value = '';
+      
+      appendRoleplay('user', message);
+      const scenario = $('scenario-select').value;
+      const result = await callAI('roleplay', { message, scenario });
+      appendRoleplay('assistant', result);
+    }
+
+    function appendRoleplay(role, text) {
+      const chat = $('roleplay-chat');
+      const div = document.createElement('div');
+      
+      if (role === 'user') {
+        div.className = 'flex gap-3 max-w-[85%] self-end flex-row-reverse';
+        div.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-rosegold flex-shrink-0 flex items-center justify-center text-sm shadow text-white font-bold border border-rosegold/20">T</div>
+          <div class="bg-rosegold/20 px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm border border-rosegold/30 text-sm text-ink whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>
+        `;
+      } else {
+        div.className = 'flex gap-3 max-w-[85%] self-start';
+        div.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-white flex-shrink-0 flex items-center justify-center text-sm shadow border border-rosegold/20">🤖</div>
+          <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-white text-sm text-ink whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>
+        `;
+      }
+      
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text;
+      return d.innerHTML;
+    }
+
+    // ========== EVENT LISTENERS ==========
+    $('checkin-btn')?.addEventListener('click', checkinDaily);
+    $('add-note-btn')?.addEventListener('click', addNote);
+    $('note-input')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addNote();
+    });
+
+    // ========== INITIAL RENDER ==========
+    function init() {
+      renderPinyinGrid();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    init();
+  </script>
+</body>
+</html>
